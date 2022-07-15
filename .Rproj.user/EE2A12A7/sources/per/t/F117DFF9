@@ -3,9 +3,9 @@
     "path": "~/MBA/TCC/arvore de decisao/arvore_de_decisao.R",
     "project_path": "arvore_de_decisao.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "3288202008",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1657851906362.0,
     "source_on_save": false,
     "relative_order": 2,
@@ -16,11 +16,11 @@
         "scrollLine": "26"
     },
     "folds": "",
-    "lastKnownWriteTime": 1657588492,
+    "lastKnownWriteTime": 1657853472,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1657852392435,
+    "last_content_update": 1657853472657,
     "read_only": false,
     "read_only_alternatives": []
 }
