@@ -6,7 +6,9 @@ pacotes <- c('tidyverse',  # Pacote básico de datawrangling
              'gtools',     # funções auxiliares como quantcut,
              'Rmisc',      # carrega a função sumarySE para a descritiva
              'scales',     # importa paletas de cores
-             'caret'       # Funções úteis para machine learning
+             'caret',       # Funções úteis para machine learning
+             'readr',
+             'reshape'
 )
 
 if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
@@ -26,14 +28,14 @@ library(reshape)
 ai4i2020_arvored_decisao <- read_csv("ai4i2020_arvored_decisao.csv")
 View(ai4i2020_arvored_decisao)
 
-# Creating temperorary data set to preserve original data
+# Creating temporary data set to preserve original data
 ai4i2020_arvored_decisao_tmp <- ai4i2020_arvored_decisao
 
 #############################################
 #changing the variables name for ease of use 
 
-str(ai4i2020_arvored_decisao_tmp) # Mostra a estrutura da base de dados
-names(ai4i2020_arvored_decisao_tmp) # Para ver os nomes das variáveis
+str(ai4i2020_arvored_decisao_tmp) # Displays the data base structure
+names(ai4i2020_arvored_decisao_tmp) # Displays the variables names
 
 # rename function : argument is - new name = older name
 
@@ -51,31 +53,31 @@ names(ai4i2020_arvored_decisao_tmp)
 ##########################################
 
 descritiva <- function(var,var1){
-  # Sumariza a taxa de sobreviventes por categoria da variável em análise
+  # Sumarize the machine failure tax related to the variable in analysis
   tgc <- Rmisc::summarySE(ai4i2020_arvored_decisao_tmp, measurevar= "machine_failure", groupvars=c(var))
   
   ggplot(tgc) + 
-    # Plota o gráfico de barras com as frequências
+    # Plots the bar graph with the frequencies
     geom_bar(aes(x=tgc[,var], weight=N/(5*var1), fill=as.factor(tgc[,var]))) + 
-    # Plota as barras de erro
+    # Plots the error bars
     geom_errorbar(aes(x=tgc[,var], y=machine_failure, ymin=machine_failure-se, ymax=machine_failure+se, colour='1'), width=.1) +
-    # Plota as médias de cada grupo
+    # Plots the averages for each group
     geom_point(aes(x=tgc[,var], y=machine_failure, colour='1', group='1')) +
-    # Plota as linhas que conectam as médias
+    # Plots the lines connecting the averages
     geom_line(aes(x=tgc[,var], y=machine_failure, colour='1', group='1')) +
-    # Escala de cores do gráfico de médias
+    # Color Scale of the Averages Chart
     scale_color_viridis_d(direction = -1, begin=0, end=.25) +
-    # Escala de cores do gráfico de barras
+    # Bar chart color scale
     scale_fill_viridis_d(direction = -1, begin=.85, end=.95) +
-    # Estética mais 'leve' do gráfico
+    # 'Lighter' graphic aesthetics
     theme(panel.background = element_rect(fill = "white", colour = "grey", linetype = "solid"),
           panel.grid.major = element_line(size = 0.15, linetype = 'solid', colour = "grey")) + 
-    # Remove a legenda
+    # Removes the subtitle
     theme(legend.position = "none") +
-    # Rótulo dos eixos
-    xlab(var) + ylab("Taxa de falha") + 
-    # Marcas do eixo secundário
-    scale_y_continuous(sec.axis = sec_axis(~.*(5*var1), name = "Frequencia"), labels = scales::percent)
+    # Axis label
+    xlab(var) + ylab("MACHINE  FAILURE  RATE  (%)") + 
+    # Secondary axis marks
+    scale_y_continuous(sec.axis = sec_axis(~.*(5*var1), name = "FREQUENCY"), labels = scales::percent)
 }
 
 #Initial analysis to check the general relationship between the maquine failure and the process variables
@@ -89,20 +91,20 @@ ai4i2020_arvored_decisao_tmp$cat_air_temperature <- quantcut (ai4i2020_arvored_d
 descritiva("cat_air_temperature", max(table(ai4i2020_arvored_decisao_tmp$cat_air_temperature)))
 #descritiva("air_temperature", length((ai4i2020_arvored_decisao_tmp$air_temperature)))
 
-ai4i2020_arvored_decisao_tmp$cat_process_temperature <- quantcut (ai4i2020_arvored_decisao_tmp$process_temperature, 20, dig.lab=6)
+ai4i2020_arvored_decisao_tmp$cat_process_temperature <- quantcut (ai4i2020_arvored_decisao_tmp$process_temperature, 8, dig.lab=6)
 descritiva("cat_process_temperature", max(table(ai4i2020_arvored_decisao_tmp$cat_process_temperature)))
 #descritiva("process_temperature", max(table(ai4i2020_arvored_decisao_tmp$process_temperature)))
 
-ai4i2020_arvored_decisao_tmp$cat_rotational_speed <- quantcut (ai4i2020_arvored_decisao_tmp$rotational_speed, 20, dig.lab=6)
+ai4i2020_arvored_decisao_tmp$cat_rotational_speed <- quantcut (ai4i2020_arvored_decisao_tmp$rotational_speed, 9, dig.lab=6)
 descritiva("cat_rotational_speed",max(table(ai4i2020_arvored_decisao_tmp$cat_rotational_speed)))
 #descritiva("rotational_speed", max(table(ai4i2020_arvored_decisao_tmp$rotational_speed)))
 
-ai4i2020_arvored_decisao_tmp$cat_torque <- quantcut (ai4i2020_arvored_decisao_tmp$torque, 20, dig.lab=6)
+ai4i2020_arvored_decisao_tmp$cat_torque <- quantcut (ai4i2020_arvored_decisao_tmp$torque, 10, dig.lab=6)
 descritiva("cat_torque", max(table(ai4i2020_arvored_decisao_tmp$cat_torque)))
 descritiva("torque",max(table(ai4i2020_arvored_decisao_tmp$torque)))
 
-ai4i2020_arvored_decisao_tmp$cat_torque <- quantcut (ai4i2020_arvored_decisao_tmp$torque, 20, dig.lab=6)
-descritiva("cat_torque", max(table(ai4i2020_arvored_decisao_tmp$cat_torque)))
+ai4i2020_arvored_decisao_tmp$cat_tool_wear <- quantcut (ai4i2020_arvored_decisao_tmp$tool_wear, 10, dig.lab=6)
+descritiva("cat_tool_wear", max(table(ai4i2020_arvored_decisao_tmp$cat_tool_wear)))
 descritiva("tool_wear", max(table(ai4i2020_arvored_decisao_tmp$tool_wear)))
      
 ai4i2020_arvored_decisao_tmp %>% str                         
