@@ -8,7 +8,8 @@ pacotes <- c('tidyverse',  # Pacote básico de datawrangling
              'scales',     # importa paletas de cores
              'caret',       # Funções úteis para machine learning
              'readr',
-             'reshape'
+             'reshape',
+             'plotROC'
 )
 
 if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
@@ -26,7 +27,7 @@ library(readr)
 library(tidyverse)
 library(reshape)
 ai4i2020_arvored_decisao <- read_csv("ai4i2020_arvored_decisao.csv")
-View(ai4i2020_arvored_decisao)
+#View(ai4i2020_arvored_decisao)
 
 # Creating temporary data set to preserve original data
 ai4i2020_arvored_decisao_tmp <- ai4i2020_arvored_decisao
@@ -49,8 +50,20 @@ ai4i2020_arvored_decisao_tmp <- dplyr::rename(ai4i2020_arvored_decisao_tmp,
                     torque = "Torque [Nm]",
                     machine_failure = "Machine failure")
 
+
+ai4i2020_arvored_decisao_tmp$machine_failure_fact <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$machine_failure == 0, "N","Y"))
+ai4i2020_arvored_decisao_tmp$TWF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$TWF == 0, "N","Y"))
+ai4i2020_arvored_decisao_tmp$HDF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$HDF == 0, "N","Y"))
+ai4i2020_arvored_decisao_tmp$PWF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$PWF == 0, "N","Y"))
+ai4i2020_arvored_decisao_tmp$OSF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$OSF == 0, "N","Y"))
+ai4i2020_arvored_decisao_tmp$RNF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$RNF == 0, "N","Y"))
+
 names(ai4i2020_arvored_decisao_tmp)
+str(ai4i2020_arvored_decisao_tmp)
 ##########################################
+
+#Quantity of machine failure events: 339 failures out of 10000 events
+table(ai4i2020_arvored_decisao_tmp$machine_failure)
 
 descritiva <- function(var,var1){
   # Sumarize the machine failure tax related to the variable in analysis
@@ -86,6 +99,8 @@ descritiva <- function(var,var1){
 
 descritiva("type",max(table((ai4i2020_arvored_decisao_tmp$type))))
 
+max(table((ai4i2020_arvored_decisao_tmp$type)))
+
 #Categorizing continuous variables to further analysis
 ai4i2020_arvored_decisao_tmp$cat_air_temperature <- quantcut (ai4i2020_arvored_decisao_tmp$air_temperature, 20, dig.lab=6)
 descritiva("cat_air_temperature", max(table(ai4i2020_arvored_decisao_tmp$cat_air_temperature)))
@@ -101,11 +116,11 @@ descritiva("cat_rotational_speed",max(table(ai4i2020_arvored_decisao_tmp$cat_rot
 
 ai4i2020_arvored_decisao_tmp$cat_torque <- quantcut (ai4i2020_arvored_decisao_tmp$torque, 10, dig.lab=6)
 descritiva("cat_torque", max(table(ai4i2020_arvored_decisao_tmp$cat_torque)))
-descritiva("torque",max(table(ai4i2020_arvored_decisao_tmp$torque)))
+#descritiva("torque",max(table(ai4i2020_arvored_decisao_tmp$torque)))
 
 ai4i2020_arvored_decisao_tmp$cat_tool_wear <- quantcut (ai4i2020_arvored_decisao_tmp$tool_wear, 10, dig.lab=6)
 descritiva("cat_tool_wear", max(table(ai4i2020_arvored_decisao_tmp$cat_tool_wear)))
-descritiva("tool_wear", max(table(ai4i2020_arvored_decisao_tmp$tool_wear)))
+#descritiva("tool_wear", max(table(ai4i2020_arvored_decisao_tmp$tool_wear)))
      
 ai4i2020_arvored_decisao_tmp %>% str                         
 
@@ -182,7 +197,7 @@ rpart.plot::rpart.plot(arvore_RNF,
 # Predizendo com a árvore
 
 # Probabilidade de sobreviver
-prob = predict(arvore, ai4i2020_arvored_decisao_tmp)
+prob = predict(arvore_machine_failure, ai4i2020_arvored_decisao_tmp)
 
 # Classificação dos sobreviventes
 class = prob[,2]>.5
@@ -194,3 +209,4 @@ tab
 
 acc <- (tab[1,1] + tab[2,2])/ sum(tab)
 acc
+
