@@ -9,7 +9,11 @@ pacotes <- c('tidyverse',  # Pacote básico de datawrangling
              'caret',       # Funções úteis para machine learning
              'readr',
              'reshape',
-             'plotROC'
+             'plotROC',
+             'readr',
+             'tidyverse',
+             'reshape'
+             
 )
 
 if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
@@ -22,25 +26,22 @@ if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
   sapply(pacotes, require, character = T) 
 }
 
-#Importing the csv dataset
-library(readr)
-library(tidyverse)
-library(reshape)
-ai4i2020_arvored_decisao <- read_csv("ai4i2020_arvored_decisao.csv")
+#Importando o dataset csv 
+arvored_decisao <- read_csv("ai4i2020_arvored_decisao.csv")
 #View(ai4i2020_arvored_decisao)
 
 # Creating temporary data set to preserve original data
-ai4i2020_arvored_decisao_tmp <- ai4i2020_arvored_decisao
+arvored_decisao_tmp <- arvored_decisao
 
 #############################################
 #changing the variables name for ease of use 
 
-str(ai4i2020_arvored_decisao_tmp) # Displays the data base structure
-names(ai4i2020_arvored_decisao_tmp) # Displays the variables names
+str(arvored_decisao_tmp) # Displays the data base structure
+names(arvored_decisao_tmp) # Displays the variables names
 
 # rename function : argument is - new name = older name
 
-ai4i2020_arvored_decisao_tmp <- dplyr::rename(ai4i2020_arvored_decisao_tmp, 
+arvored_decisao_tmp <- dplyr::rename(arvored_decisao_tmp, 
                     process_temperature = "Process temperature [K]",
                     product_id  = "Product ID",
                     air_temperature = "Air temperature [K]",
@@ -51,23 +52,23 @@ ai4i2020_arvored_decisao_tmp <- dplyr::rename(ai4i2020_arvored_decisao_tmp,
                     machine_failure = "Machine failure")
 
 
-ai4i2020_arvored_decisao_tmp$machine_failure_fact <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$machine_failure == 0, "N","Y"))
-ai4i2020_arvored_decisao_tmp$TWF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$TWF == 0, "N","Y"))
-ai4i2020_arvored_decisao_tmp$HDF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$HDF == 0, "N","Y"))
-ai4i2020_arvored_decisao_tmp$PWF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$PWF == 0, "N","Y"))
-ai4i2020_arvored_decisao_tmp$OSF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$OSF == 0, "N","Y"))
-ai4i2020_arvored_decisao_tmp$RNF <- as.factor(ifelse(ai4i2020_arvored_decisao_tmp$RNF == 0, "N","Y"))
+arvored_decisao_tmp$machine_failure_factor <- as.factor(ifelse(arvored_decisao_tmp$machine_failure == 0, "N","Y"))
+arvored_decisao_tmp$TWF <- as.factor(ifelse(arvored_decisao_tmp$TWF == 0, "N","Y"))
+arvored_decisao_tmp$HDF <- as.factor(ifelse(arvored_decisao_tmp$HDF == 0, "N","Y"))
+arvored_decisao_tmp$PWF <- as.factor(ifelse(arvored_decisao_tmp$PWF == 0, "N","Y"))
+arvored_decisao_tmp$OSF <- as.factor(ifelse(arvored_decisao_tmp$OSF == 0, "N","Y"))
+arvored_decisao_tmp$RNF <- as.factor(ifelse(arvored_decisao_tmp$RNF == 0, "N","Y"))
 
-names(ai4i2020_arvored_decisao_tmp)
-str(ai4i2020_arvored_decisao_tmp)
+names(arvored_decisao_tmp)
+str(arvored_decisao_tmp)
 ##########################################
 
 #Quantity of machine failure events: 339 failures out of 10000 events
-table(ai4i2020_arvored_decisao_tmp$machine_failure)
+table(arvored_decisao_tmp$machine_failure)
 
 descritiva <- function(var,var1){
   # Sumarize the machine failure tax related to the variable in analysis
-  tgc <- Rmisc::summarySE(ai4i2020_arvored_decisao_tmp, measurevar= "machine_failure", groupvars=c(var))
+  tgc <- Rmisc::summarySE(arvored_decisao_tmp, measurevar= "machine_failure", groupvars=c(var))
   
   ggplot(tgc) + 
     # Plots the bar graph with the frequencies
@@ -97,116 +98,30 @@ descritiva <- function(var,var1){
 #Green: Frequency
 #Blue: Average fail error
 
-descritiva("type",max(table((ai4i2020_arvored_decisao_tmp$type))))
+descritiva("type",max(table((arvored_decisao_tmp$type))))
 
-max(table((ai4i2020_arvored_decisao_tmp$type)))
+max(table((arvored_decisao_tmp$type)))
 
 #Categorizing continuous variables to further analysis
-ai4i2020_arvored_decisao_tmp$cat_air_temperature <- quantcut (ai4i2020_arvored_decisao_tmp$air_temperature, 20, dig.lab=6)
-descritiva("cat_air_temperature", max(table(ai4i2020_arvored_decisao_tmp$cat_air_temperature)))
-#descritiva("air_temperature", length((ai4i2020_arvored_decisao_tmp$air_temperature)))
+arvored_decisao_tmp$cat_air_temperature <- quantcut (arvored_decisao_tmp$air_temperature, 20, dig.lab=6)
+descritiva("cat_air_temperature", max(table(arvored_decisao_tmp$cat_air_temperature)))
 
-ai4i2020_arvored_decisao_tmp$cat_process_temperature <- quantcut (ai4i2020_arvored_decisao_tmp$process_temperature, 8, dig.lab=6)
-descritiva("cat_process_temperature", max(table(ai4i2020_arvored_decisao_tmp$cat_process_temperature)))
-#descritiva("process_temperature", max(table(ai4i2020_arvored_decisao_tmp$process_temperature)))
 
-ai4i2020_arvored_decisao_tmp$cat_rotational_speed <- quantcut (ai4i2020_arvored_decisao_tmp$rotational_speed, 9, dig.lab=6)
-descritiva("cat_rotational_speed",max(table(ai4i2020_arvored_decisao_tmp$cat_rotational_speed)))
-#descritiva("rotational_speed", max(table(ai4i2020_arvored_decisao_tmp$rotational_speed)))
+arvored_decisao_tmp$cat_process_temperature <- quantcut (arvored_decisao_tmp$process_temperature, 8, dig.lab=6)
+descritiva("cat_process_temperature", max(table(arvored_decisao_tmp$cat_process_temperature)))
 
-ai4i2020_arvored_decisao_tmp$cat_torque <- quantcut (ai4i2020_arvored_decisao_tmp$torque, 10, dig.lab=6)
-descritiva("cat_torque", max(table(ai4i2020_arvored_decisao_tmp$cat_torque)))
-#descritiva("torque",max(table(ai4i2020_arvored_decisao_tmp$torque)))
 
-ai4i2020_arvored_decisao_tmp$cat_tool_wear <- quantcut (ai4i2020_arvored_decisao_tmp$tool_wear, 10, dig.lab=6)
-descritiva("cat_tool_wear", max(table(ai4i2020_arvored_decisao_tmp$cat_tool_wear)))
-#descritiva("tool_wear", max(table(ai4i2020_arvored_decisao_tmp$tool_wear)))
+arvored_decisao_tmp$cat_rotational_speed <- quantcut (arvored_decisao_tmp$rotational_speed, 9, dig.lab=6)
+descritiva("cat_rotational_speed",max(table(arvored_decisao_tmp$cat_rotational_speed)))
+
+
+arvored_decisao_tmp$cat_torque <- quantcut (arvored_decisao_tmp$torque, 10, dig.lab=6)
+descritiva("cat_torque", max(table(arvored_decisao_tmp$cat_torque)))
+
+
+arvored_decisao_tmp$cat_tool_wear <- quantcut (arvored_decisao_tmp$tool_wear, 10, dig.lab=6)
+descritiva("cat_tool_wear", max(table(arvored_decisao_tmp$cat_tool_wear)))
+
      
-ai4i2020_arvored_decisao_tmp %>% str                         
-
-#as.factor(ai4i2020_arvored_decisao_tmp$product_id) + as.factor(ai4i2020_arvored_decisao_tmp$type) +
-
-#############################################
-# Vamos construir a árvore de classificação #
-arvore_machine_failure <- rpart::rpart(machine_failure ~  air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                data=ai4i2020_arvored_decisao_tmp,
-                parms = list(split = 'gini'), # podemos trocar para  'information'
-                method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-arvore_TWF <- rpart::rpart(TWF ~ air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                           data=ai4i2020_arvored_decisao_tmp,
-                           parms = list(split = 'gini'), # podemos trocar para  'information'
-                           method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-arvore_HDF <- rpart::rpart(HDF ~ air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                                       data=ai4i2020_arvored_decisao_tmp,
-                                       parms = list(split = 'gini'), # podemos trocar para  'information'
-                                       method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-arvore_PWF <- rpart::rpart(PWF ~ air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                           data=ai4i2020_arvored_decisao_tmp,
-                           parms = list(split = 'gini'), # podemos trocar para  'information'
-                           method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-arvore_OSF <- rpart::rpart(OSF ~ air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                           data=ai4i2020_arvored_decisao_tmp,
-                           parms = list(split = 'gini'), # podemos trocar para  'information'
-                           method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-arvore_RNF <- rpart::rpart(RNF ~ air_temperature + process_temperature + rotational_speed + torque + tool_wear,
-                           data=ai4i2020_arvored_decisao_tmp,
-                           parms = list(split = 'gini'), # podemos trocar para  'information'
-                           method='class' # Essa opção indica que a resposta é qualitativa
-)
-
-#########################
-# Visualizando a árvore #
-
-# Definindo uma paleta de cores
-paleta = scales::viridis_pal(begin=.75, end=1)(20)
-# Plotando a árvore
-rpart.plot::rpart.plot(arvore_machine_failure,
-                       box.palette = paleta) # Paleta de cores
-
-#FAIL
-rpart.plot::rpart.plot(arvore_TWF,
-                       box.palette = paleta) # Paleta de cores
-
-rpart.plot::rpart.plot(arvore_HDF,
-                      box.palette = paleta) # Paleta de cores
-
-rpart.plot::rpart.plot(arvore_PWF,
-                       box.palette = paleta) # Paleta de cores
-
-rpart.plot::rpart.plot(arvore_OSF,
-                       box.palette = paleta) # Paleta de cores
-
-#FAIL
-rpart.plot::rpart.plot(arvore_RNF,
-                       box.palette = paleta) # Paleta de cores
-##############################
-
-
-# Avaliação básica da árvore #
-
-# Predizendo com a árvore
-
-# Probabilidade de sobreviver
-prob = predict(arvore_machine_failure, ai4i2020_arvored_decisao_tmp)
-
-# Classificação dos sobreviventes
-class = prob[,2]>.5
-
-head (class)
-# Matriz de confusão
-tab <- table(class, ai4i2020_arvored_decisao_tmp$machine_failure)
-tab
-
-acc <- (tab[1,1] + tab[2,2])/ sum(tab)
-acc
+arvored_decisao_tmp %>% str                         
 
