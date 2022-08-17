@@ -66,6 +66,27 @@ str(arvored_decisao_tmp)
 #Quantity of machine failure events: 339 failures out of 10000 events
 table(arvored_decisao_tmp$machine_failure)
 
+#criação de uma base de dados composta apenas das observações com falha
+all_errors <- data.frame(filter(arvored_decisao_tmp, arvored_decisao_tmp$machine_failure_factor == 'Y'))
+all_errors
+filter(all_errors, all_errors$machine_failure == 1)
+names(all_errors)
+count(all_errors$TWF)
+count(arvored_decisao_tmp$TWF)
+
+count(all_errors$OSF)
+count(arvored_decisao_tmp$OSF)
+
+count(all_errors$HDF)
+count(arvored_decisao_tmp$HDF)
+
+count(all_errors$PWF)
+count(arvored_decisao_tmp$PWF)
+
+count(all_errors$RNF)
+count(arvored_decisao$RNF)
+
+filter(arvored_decisao_tmp, arvored_decisao_tmp$RNF == 'Y')
 descritiva <- function(var,var1){
   # Sumarize the machine failure tax related to the variable in analysis
   tgc <- Rmisc::summarySE(arvored_decisao_tmp, measurevar= "machine_failure", groupvars=c(var))
